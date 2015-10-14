@@ -26,6 +26,8 @@ int main(int argc, char** argv) {
     string fastaRef;
     bool keepFailures = false;
     bool excludeFailures = false;
+    
+    bool bigVcf = false;
 
     if (argc == 1)
         printSummary(argv);
@@ -39,6 +41,7 @@ int main(int argc, char** argv) {
                 {"fasta-reference",  required_argument, 0, 'f'},
                 {"exclude-failures",  no_argument, 0, 'x'},
                 {"keep-failures",  no_argument, 0, 'k'},
+                {"big-vcf",  no_argument, 0, 'b'},
                 //{"length",  no_argument, &printLength, true},
                 {0, 0, 0, 0}
             };
@@ -74,6 +77,10 @@ int main(int argc, char** argv) {
 
         case 'k':
             keepFailures = true;
+            break;
+            
+        case 'b':
+            bigVcf = true;
             break;
  
         case 'h':
@@ -120,7 +127,12 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         int refstart = var.position - 1; // convert to 0-based
-        string matchedRef = ref.getSubSequence(var.sequenceName, refstart, var.ref.size());
+        string matchedRef;
+        if (bigVcf){
+            matchedRef = getRef(var.sequenceName, refstart, var.ref.size());
+        }else{
+            matchedRef = ref.getSubSequence(var.sequenceName, refstart, var.ref.size());
+        }
         if (var.ref != matchedRef) {
             if (keepFailures) {
                 cout << var << endl;
