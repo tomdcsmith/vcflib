@@ -17,7 +17,6 @@ class CachedRef {
 public:
     
     FastaReference fastaRef;
-    map<string, string> chromosomeMap;
     
     CachedRef(FastaReference fastaRef);
     
@@ -26,6 +25,8 @@ public:
     
 private:
    
+    map<string, string> chromosomeMap;
+    
     void cacheSeq(string seqname);
     
 };
