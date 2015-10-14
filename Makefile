@@ -1,8 +1,10 @@
 #OBJ_DIR = ./
 HEADERS = src/Variant.h \
+		  src/CachedRef.h \
 		  src/split.h \
 		  src/join.h
 SOURCES = src/Variant.cpp \
+		  src/CachedRef.cpp \
 		  src/split.cpp
 OBJECTS= $(SOURCES:.cpp=.o)
 

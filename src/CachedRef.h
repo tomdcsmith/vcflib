@@ -11,6 +11,7 @@
 #include <map>
 #include "fastahack/Fasta.h"
 
+using namespace std;
 
 class CachedRef {
     
@@ -18,7 +19,7 @@ public:
     
     FastaReference fastaRef;
     
-    CachedRef(FastaReference fastaRef);
+    CachedRef(FastaReference& fastaRef);
     
     string getSequence(string seqname, int start, int length);
        

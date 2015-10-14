@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include "split.h"
 #include "fastahack/Fasta.h"
+#include "CachedRef.h"
 #include <getopt.h>
 
 using namespace std;
@@ -27,7 +28,7 @@ int main(int argc, char** argv) {
     bool keepFailures = false;
     bool excludeFailures = false;
     
-    bool bigVcf = false;
+    bool cacheRef = false;
 
     if (argc == 1)
         printSummary(argv);
@@ -41,7 +42,7 @@ int main(int argc, char** argv) {
                 {"fasta-reference",  required_argument, 0, 'f'},
                 {"exclude-failures",  no_argument, 0, 'x'},
                 {"keep-failures",  no_argument, 0, 'k'},
-                {"big-vcf",  no_argument, 0, 'b'},
+                {"cache-ref",  no_argument, 0, 'c'},
                 //{"length",  no_argument, &printLength, true},
                 {0, 0, 0, 0}
             };
@@ -79,8 +80,8 @@ int main(int argc, char** argv) {
             keepFailures = true;
             break;
             
-        case 'b':
-            bigVcf = true;
+        case 'c':
+            cacheRef = true;
             break;
  
         case 'h':
@@ -106,6 +107,8 @@ int main(int argc, char** argv) {
 
     FastaReference ref;
     ref.open(fastaRef);
+    
+    CachedRef cachedRef(ref);
 
     VariantCallFile variantFile;
     string inputFilename;
@@ -128,8 +131,8 @@ int main(int argc, char** argv) {
     while (variantFile.getNextVariant(var)) {
         int refstart = var.position - 1; // convert to 0-based
         string matchedRef;
-        if (bigVcf){
-            matchedRef = getRef(var.sequenceName, refstart, var.ref.size());
+        if (cacheRef){
+            matchedRef = cachedRef.getSequence(var.sequenceName, refstart, var.ref.size());
         }else{
             matchedRef = ref.getSubSequence(var.sequenceName, refstart, var.ref.size());
         }
