@@ -121,6 +121,7 @@ libvcflib.a
 
 
 ////
+nbproject
 nbproject/private/
 build/
 nbbuild/
