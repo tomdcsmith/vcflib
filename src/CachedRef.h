@@ -17,7 +17,7 @@ class CachedRef {
     
 public:
     
-    FastaReference fastaRef;
+    FastaReference* fastaRef;
     
     CachedRef(FastaReference& fastaRef);
     ~CachedRef(void);
@@ -27,7 +27,7 @@ public:
     
 private:
    
-    map<string, string> chromosomeMap;
+    map<string, string>* chromosomeMap;
     
     void cacheSeq(string seqname);
     
