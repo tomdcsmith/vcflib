@@ -14,6 +14,7 @@ void printSummary(char** argv) {
          << "    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences" << endl
          << "    -x, --exclude-failures If a record fails, don't print it.  Otherwise do." << endl
          << "    -k, --keep-failures    Print if the record fails, otherwise not." << endl
+         << "    -c, --cache-ref    Cache FASTA sequence in memory. Use this when using gzipped FASTA files and/or large vcf files." << endl
          << endl
          << "Verifies that the VCF REF field matches the reference as described." << endl
          << endl;
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hxkf:",
+        c = getopt_long (argc, argv, "hxkcf:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */

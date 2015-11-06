@@ -99,7 +99,7 @@ LDFLAGS = -lvcflib -lhts -lpthread -lz -lm
 all: $(OBJECTS) $(BINS)
 
 CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
+CXXFLAGS = -g -O3 -D_FILE_OFFSET_BITS=64
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
@@ -150,7 +150,7 @@ $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(D
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) -lboost_iostreams -lz
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX)
-	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX) -lboost_iostreams -lz
+	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX)
 
 
 test: $(BINS)

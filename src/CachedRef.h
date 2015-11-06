@@ -20,6 +20,7 @@ public:
     FastaReference fastaRef;
     
     CachedRef(FastaReference& fastaRef);
+    ~CachedRef(void);
     
     string getSequence(string seqname, int start, int length);
        
