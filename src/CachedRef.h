@@ -9,7 +9,7 @@
 #define	CACHEDREF_H
 
 #include <map>
-#include "fastahack/Fasta.h"
+#include "Fasta.h"
 
 using namespace std;
 
