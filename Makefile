@@ -91,7 +91,7 @@ SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
 
 TABIX = tabixpp/tabix.o
 FASTAHACK = fastahack/Fasta.o
-SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o 
+SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o
 REPEATS = smithwaterman/Repeats.o
 INDELALLELE = smithwaterman/IndelAllele.o
 DISORDER = smithwaterman/disorder.o
@@ -148,7 +148,7 @@ $(LEFTALIGN): $(SMITHWATERMAN)
 $(INDELALLELE): $(SMITHWATERMAN)
 
 $(FASTAHACK): pre
-	cd fastahack && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
+	cd fastahack && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp Fasta.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
 
 #$(FSOM):
 #	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
