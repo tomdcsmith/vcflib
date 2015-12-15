@@ -99,7 +99,7 @@ FSOM = fsom/fsom.o
 FILEVERCMP = filevercmp/filevercmp.o
 
 INCLUDES = -I. -Itabixpp/htslib/ -L. -Ltabixpp/ -Ltabixpp/htslib/
-LDFLAGS = -lvcflib -lhts -lpthread -lz -lm
+LDFLAGS = -lvcflib -lhts -lpthread -lboost_iostreams -lz -lm -lz
 
 
 all: $(OBJECTS) $(BINS)
@@ -153,7 +153,7 @@ $(SHORTBINS):
 	$(MAKE) bin/$@
 
 $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP)
-	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) -lboost_iostreams -lz
+	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX) pre
 	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX)
