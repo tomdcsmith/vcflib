@@ -14,6 +14,8 @@ void printSummary(char** argv) {
          << "    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences" << endl
          << "    -x, --exclude-failures If a record fails, don't print it.  Otherwise do." << endl
          << "    -k, --keep-failures    Print if the record fails, otherwise not." << endl
+	     << "    -h, --help       Print this message." << endl
+	     << "    -v, --version    Print version." << endl
          << "    -c, --cache-ref    Cache FASTA sequence in memory. Use this when using gzipped FASTA files and/or large vcf files." << endl
          << endl
          << "Verifies that the VCF REF field matches the reference as described." << endl
@@ -44,13 +46,14 @@ int main(int argc, char** argv) {
                 {"exclude-failures",  no_argument, 0, 'x'},
                 {"keep-failures",  no_argument, 0, 'k'},
                 {"cache-ref",  no_argument, 0, 'c'},
+                {"version",  no_argument, 0, 'v'},
                 //{"length",  no_argument, &printLength, true},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hxkcf:",
+        c = getopt_long (argc, argv, "hvxkcf:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -70,32 +73,43 @@ int main(int argc, char** argv) {
             break;
 
         case 'f':
+	  {
             fastaRef = optarg;
             break;
-
+	  }
+	case 'v':
+	  {
+	    printBasicVersion();
+	    exit(0);
+	  }
         case 'x':
+	  {
             excludeFailures = true;
             break;
-
+	  }
         case 'k':
+	  {
             keepFailures = true;
             break;
-            
+	  }
         case 'c':
+	  {
             cacheRef = true;
             break;
- 
+	  }
         case 'h':
+	  {
             printSummary(argv);
             exit(0);
             break;
-
+	  }
         case '?':
+	  {
             /* getopt_long already printed an error message. */
             printSummary(argv);
             exit(1);
             break;
- 
+	  }
         default:
             abort ();
         }

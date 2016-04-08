@@ -1,11 +1,11 @@
-# vcflib
-### a C++ library for parsing and manipulating VCF files.
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# vcflib 
+### A C++ library for parsing and manipulating VCF files.
 
 #### author: Erik Garrison <erik.garrison@bc.edu>
 
 #### license: MIT
 
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib)
 ---
 
 ## overview
@@ -24,6 +24,19 @@ It is both:
 
 The API itself provides a quick and extremely permissive method to read and write VCF files.
 Extensions and applications of the library provided in the included utilities (*.cpp) comprise the vast bulk of the library's utility for most users.
+
+## download and install 
+
+1. Under the repository name, click to copy the clone URL for the repository. ![](https://help.github.com/assets/images/help/repository/clone-repo-clone-url-button.png)
+
+2. Go to the location where you want the cloned directory to be made:  `cd <PathWhereIWantToCloneVcflib>`
+
+3. Type `git clone --recursive`, and then paste the URL you copied in Step 1.
+
+4. Enter the cloned directory and type `make` to compile the programs.  If you want to use threading type `make openmp` instead of `make`.  Only a few VCFLIB tools are threaded.
+
+5. Once make is finished the executables are ready in the folder `<PathWhereIWantToCloneVcflib>/vcflib/bin/`. Set this path as an  environment variable in the .bashrc file to access executables form everywhere on your proile OR call the executables from the path where they are. 
+
 
 ## usage
 
@@ -648,3 +661,270 @@ as the previous record.
 
 For each record, remove any duplicate alternate alleles that may have resulted from merging
 separate VCF files.
+
+## GPAT++ 
+
+The application of population genomics to non-model organisms is greatly facilitated by the low cost of next generation sequencing (NGS). Barriers, however, exist for using NGS data for population level analyses. Traditional population genetic metrics, such as Fst, are not robust to the genotyping errors inherent in noisy NGS data. Additionally, many older software tools were never designed to handle the volume of data produced by NGS pipelines. To overcome these limitations we have developed a flexible software library designed specifically for large and noisy NGS datasets. The Genotype Phenotype Association Toolkit (GPAT++) implements both traditional and novel population genetic methods in a single user-friendly framework. GPAT consists of a suite of command-line tools and a Perl API that programmers can use to develop new applications. To date GPAT++ has been used successfully to identity genotype-phenotype associations in several real-world datasets including: domestic pigeons, Pox virus and pine rust fungus. GPAT++ is open source and freely available for academic use.
+
+### Functions
+ - [X] Basic population stats (Af, Pi, eHH, oHet, genotypeCounts)
+ - [X] Several flavors of Fst
+ - [X] Linkage 
+ - [X] Association testing (genotypic and pooled data)
+ - [X] Haplotype methods (hapLrt)
+ - [X] Smoothing 
+ - [X] Permutation
+ - [X] Plotting 
+ 
+### Documentation , basic usage, FAQ
+
+
+1. Most GPAT++ tools write to both STDERR and STDOUT.
+2. All GPAT++ tools group individuals using a zero-based comma separated index (e.g. 0,1,2 ; first three individuals in VCF)
+3. Some GPAT++ tools (haplotype methods) require a region.
+4. What is the genotype likelihood format?  When in doubt use GT! Only a few GPAT++ tools make use of the genotype likelihoods.
+ GT: The genotype is correct
+ GL: Genotype likelihood (Freebayes)
+ GP: Genotype probability (Beagle)
+ PL: Scaled genotype likelihood (GATK)
+5. pFst is the only tool that will work on pooled data.
+ 
+### wcFst
+
+Calculates Weir and Cockerham's Fst estimator bi-allelic genotype data (Weir and Cockerham 1984).  Sites with less than five genotypes in the target and background are skipped because they provide unreliable estimates of Fst.  Fix sites are also ignored.
+
+```
+INFO: help
+INFO: description:
+      wcFst is Weir & Cockerham's Fst for two populations.  Negative values are VALID,
+      they are sites which can be treated as zero Fst. For more information see Evolution, Vol. 38 N. 6 Nov 1984.
+      Specifically wcFst uses equations 1,2,3,4.
+
+Output : 3 columns :
+     1. seqid
+     2. position
+     3. target allele frequency
+     4. background allele frequency
+     5. wcFst
+
+INFO: usage:  wcFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL
+
+INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns
+INFO: required: b,background -- argument: a zero based comma separated list of background individuals corrisponding to VCF columns
+INFO: required: f,file       -- argument: proper formatted VCF
+INFO: required, y,type       -- argument: genotype likelihood format; genotype : GT,GL,PL,GP
+INFO: optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end
+INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero
+```
+
+### segmentFst
+
+This program provides a way to find continious regions with high Fst values.  It takes the output of wcFst and produces a BED file.  These high Fst region can be permutated with 'permuteGPATwindow'.
+
+```
+INFO: help
+INFO: description:
+      Creates genomic segments (bed file) for regions with high wcFst
+Output : 8 columns :
+     1. Seqid
+     2. Start (zero based)
+     3. End   (zero based)
+     4. Average Fst
+     5. Average high Fst (Fst > -s)
+     6. N Fst values in segment
+     7. N high fst values in segment
+     8. Segment length
+INFO: usage:  segmentFst -s 0.7 -f wcFst.output.txt
+
+INFO: required: -f            -- Output from wcFst
+INFO: optional: -s            -- High Fst cutoff [0.8] 
+
+```
+
+
+### popStats
+Calculates basic population statistics at bi-allelic sites. The allele frequency is the number of non-reference alleles divided by the total number of alleles.  The expected hetrozygosity is 2*p*q, where p is the non-reference allele frequency and q is 1-p.  The observed heterozgosity is the fraction of 0/1 genotypes out of all genotypes.  The inbreeding coefficent, Fis, is the relative heterozygosity of each individual vs. compared to the target group. 
+
+```
+INFO: help
+INFO: description:
+      General population genetic statistics for each SNP
+
+Output : 9 columns :
+     1. seqid
+     2. position
+     3. target allele frequency
+     4. expected heterozygosity
+     5. observed heterozygosity
+     6. number of hets
+     7. number of homozygous ref
+     8. number of homozygous alt
+     9. target Fis
+INFO: usage:  popStat --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf
+
+INFO: required: t,target     -- a zero based comma separated list of target individuals corresponding to VCF columns
+INFO: required: f,file       -- proper formatted VCF
+INFO: required, y,type       -- genotype likelihood format; genotype : GL,PL,GP
+INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1
+```
+### genotypeSummary
+
+Generates a table of genotype counts.
+
+```
+INFO: help
+INFO: description:
+      Summarizes genotype counts for bi-allelic SNVs and indel
+
+INFO: usage:  genotypeSummmary --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf --snp
+
+INFO: required: t,target     -- a zero based comma separated list of target individuals corresponding to VCF columns
+INFO: required: f,file       -- proper formatted VCF
+INFO: required, y,type       -- genotype likelihood format; genotype : GL,PL,GP
+INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1
+INFO: optional, s,snp        -- Only count SNPs 
+
+```
+
+### pFst
+
+pFst is a likelihood ratio test (LRT) quantifying allele frequency differences between populations.  The LRT by default uses the binomial distribution.  If Genotype likelihoods are provided it uses a modified binomial that weights each allele count by its certainty.  If type is set to 'PO' the LRT uses a beta distribution to fit the allele frequency spectrum of the target and background.  PO requires the AD and DP genotype fields and requires at least two pools for the target and background.  The p-value calculated in pFst is based on the chi-squared distribution with one degree of freedom. 
+
+```
+INFO: help
+INFO: description:
+      Summarizes genotype counts for bi-allelic SNVs and indel
+INFO: output: table of genotype counts for each individual.
+INFO: usage:  genotypeSummmary --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf --snp
+
+INFO: required: t,target     -- a zero based comma separated list of target individuals corresponding to VCF columns
+INFO: required: f,file       -- proper formatted VCF
+INFO: required, y,type       -- genotype likelihood format; genotype : GL,PL,GP
+INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1
+INFO: optional, s,snp        -- Only count SNPs
+```
+### EHH and PI
+
+The 'sequenceDiversity' program calculates extended haplotype homozygosity and pi within a fixed-width sliding window.  This requires phased data.
+
+```
+INFO: help
+INFO: description:
+      The sequenceDiversity program calculates two popular metrics of  haplotype diversity: pi and
+      extended haplotype homozygoisty (eHH).  Pi is calculated using the Nei and Li 1979 formulation.
+      eHH a convenient way to think about haplotype diversity.  When eHH = 0 all haplotypes in the window
+      are unique and when eHH = 1 all haplotypes in the window are identical.
+
+Output : 5 columns:
+         1.  seqid
+         2.  start of window
+         3.  end of window
+         4.  pi
+         5.  eHH
+
+
+INFO: usage: sequenceDiversity --target 0,1,2,3,4,5,6,7 --file my.vcf
+
+INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corresponding to VCF columns
+INFO: required: f,file       -- argument: a properly formatted phased VCF file
+INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP
+INFO: optional: a,af         -- sites less than af  are filtered out; default is 0
+INFO: optional: r,region     -- argument: a tabix compliant region : "seqid:0-100" or "seqid"
+INFO: optional: w,window     -- argument: the number of SNPs per window; default is 20
+
+```
+
+###meltEHH
+
+The program 'meltEHH' produces the data to generate the following plot:
+
+<img src="https://github.com/vcflib/vcflib/blob/master/examples/example-ehh.png?raw=true" alt="" width=400>
+
+```
+INFO: help
+INFO: description:
+     meltEHH provides the data to plot EHH curves.
+Output : 4 columns :
+     1. seqid
+     2. position
+     3. EHH
+     4. ref or alt [0 == ref]
+Usage:
+      meltEHH --target 0,1,2,3,4,5,6,7 --pos 10 --file my.phased.vcf  \
+           --region chr1:1-1000 > STDOUT 2> STDERR
+
+Params:
+       required: t,target   <STRING>  A zero base comma separated list of target
+                                     individuals corresponding to VCF columns
+       required: r,region   <STRING>  A tabix compliant genomic range
+                                     format: "seqid:start-end" or "seqid"
+       required: f,file     <STRING>  Proper formatted and phased VCF.
+       required: y,type     <STRING>  Genotype likelihood format: GT,PL,GL,GP
+       required: p,position <INT>     Variant position to melt.
+       optional: a,af       <DOUBLE>  Alternative alleles with frequencies less
+                                     than [0.05] are skipped.
+```
+### iHS
+
+iHS calculates the integrated haplotype score which measures the relative decay of extended haplotype homozygosity (EHH) for the reference and alternative alleles at a site (see: voight et al. 2006, Spiech & Hernandez 2014).  Our code is highly concordant with both implementations mentioned. However, we do not set an upper limit to the allele frequency.  iHS can be run without a genetic map, in which case the change in EHH is integrated over a constant.  Human genetic maps for GRCh36 and GRCh37 (hg18 & hg19) can be found at: http://bochet.gcc.biostat.washington.edu/beagle/genetic_maps/ . iHS by default interpolates SNV positions to genetic position (you don't need a genetic position for every VCF entry in the map file).
+
+iHS analyses requires normalization by allele frequency.  It is important that iHS is calculated over large regions so that the normalization does not down weight real signals.  For genome-wide runs it is recommended to run slightly overlapping windows and throwing out values that fail integration (columns 7 & 8 in the output) and then removing duplicates by using the 'sort' and 'uniq' linux commands.  Normalization of the output is as simple as running 'normalize-iHS'.
+
+```
+INFO: help
+INFO: description:
+     iHS calculates the integrated ratio of haplotype decay between the reference and non-reference allele.
+Output : 4 columns :
+     1. seqid
+     2. position
+     3. target allele frequency
+     4. integrated EHH (alternative)
+     5. integrated EHH (reference)
+     6. iHS ln(iEHHalt/iEHHref)
+     7. != 0 integration failure
+     8. != 0 integration failure
+
+Usage:
+      iHS  --target 0,1,2,3,4,5,6,7 --file my.phased.vcf  \
+           --region chr1:1-1000 > STDOUT 2> STDERR
+
+Params:
+       required: t,target  <STRING>  A zero base comma separated list of target
+                                     individuals corresponding to VCF columns
+       required: r,region  <STRING>  A tabix compliant genomic range
+                                     format: "seqid:start-end" or "seqid"
+       required: f,file    <STRING>  Proper formatted and phased VCF.
+       required: y,type    <STRING>  Genotype likelihood format: GT,PL,GL,GP
+       optional: a,af      <DOUBLE>  Alternative alleles with frquences less
+                                     than [0.05] are skipped.
+       optional: x,threads <INT>     Number of CPUS [1].
+       recommended: g,gen <STRING>   A PLINK formatted map file.
+
+```
+### smoother
+```
+A method for window smoothing many of the GPAT++ formats.
+
+INFO: help
+INFO: description:
+      Smoother averages a set of scores over a sliding genomic window.
+      Smoother slides over genomic positions not the SNP indices. In other words
+      the number of scores within a window will not be constant. The last
+      window for each seqid can be smaller than the defined window size.
+      Smoother automatically analyses different seqids separately.
+Output : 4 columns :
+     1. seqid
+     2. window start
+     2. window end
+     3. averaged score
+
+INFO: usage: smoother --format pFst --file GPA.output.txt
+
+INFO: required: f,file     -- argument: a file created by GPAT++
+INFO: required: o,format   -- argument: format of input file, case sensitive
+                              available format options:
+                                wcFst, pFst, bFst, iHS, xpEHH, abba-baba
+INFO: optional: w,window   -- argument: size of genomic window in base pairs (default 5000)
+INFO: optional: s,step     -- argument: window step size in base pairs (default 1000)
+INFO: optional: t,truncate -- flag    : end last window at last position (zero based) last window at last position (zero based)
+```
