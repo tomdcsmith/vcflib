@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include "split.h"
 #include "Fasta.h"
+#include "gpatInfo.hpp"
 #include "CachedRef.h"
 #include <getopt.h>
 
